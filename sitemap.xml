@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Personal site -->
+
+  <url>
+    <loc>https://losedavidpb.github.io/en/</loc>
+  </url>
+
+  <url>
+    <loc>https://losedavidpb.github.io/es/</loc>
+  </url>
+
+  <!-- Portfolio -->
+
+  <url>
+    <loc>https://losedavidpb.github.io/portfolio/en/</loc>
+  </url>
+
+  <url>
+    <loc>https://losedavidpb.github.io/portfolio/es/</loc>
+  </url>
+
+  <!-- Netviz Web -->
+
+  <url>
+    <loc>https://losedavidpb.github.io/netvizWeb/</loc>
+  </url>
+</urlset>

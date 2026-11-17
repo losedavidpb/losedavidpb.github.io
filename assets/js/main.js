@@ -1,0 +1,1 @@
+import{load_localization as n}from"./localization.js";import{init_page as a}from"./page.js";async function i(){try{const o=await n();a(o)}catch(o){console.error(o)}finally{document.documentElement.classList.remove("i18n-loading")}}i();
