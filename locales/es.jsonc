@@ -1,0 +1,41 @@
+{
+  // Site
+  // ######################################
+
+  "site": {
+    "title": "David Parreño - Sitio personal",
+    "description": "Página personal de David Parreño con enlaces a su portfolio, proyectos y perfiles profesionales.",
+    "author": "David Parreño",
+    "role": "Ingeniero Informático",
+    "profileImageAlt": "Imagen de perfil de David Parreño",
+    "linkedInLabel": "Abrir el perfil de LinkedIn de David Parreño",
+    "navigationTitle": "Enlaces principales"
+  },
+
+  // General
+  // ######################################
+
+  "visit": "Visitar →",
+
+  // Links
+  // ######################################
+
+  "links": [
+    {
+      "name": "Portfolio",
+      "desc": "Experiencia, formación, habilidades y proyectos destacados."
+    },
+    {
+      "name": "Netviz Web",
+      "desc": "Aplicación web para la visualización interactiva de redes."
+    },
+    {
+      "name": "GitHub",
+      "desc": "Repositorios, código fuente y proyectos de software."
+    },
+    {
+      "name": "LinkedIn",
+      "desc": "Trayectoria profesional, experiencia y formación."
+    }
+  ]
+}

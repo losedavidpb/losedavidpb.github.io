@@ -1,0 +1,41 @@
+{
+  // Site
+  // ######################################
+
+  "site": {
+    "title": "David Parreño - Personal Site",
+    "description": "David Parreño's personal site with links to his portfolio, projects, and professional profiles.",
+    "author": "David Parreño",
+    "role": "Computer Engineer",
+    "profileImageAlt": "Profile image of David Parreño",
+    "linkedInLabel": "Open David Parreño's LinkedIn profile",
+    "navigationTitle": "Main links"
+  },
+
+  // General
+  // ######################################
+
+  "visit": "Visit →",
+
+  // Links
+  // ######################################
+
+  "links": [
+    {
+      "name": "Portfolio",
+      "desc": "Experience, education, skills, and featured projects."
+    },
+    {
+      "name": "Netviz Web",
+      "desc": "Interactive web application for network visualization."
+    },
+    {
+      "name": "GitHub",
+      "desc": "Repositories, source code, and software projects."
+    },
+    {
+      "name": "LinkedIn",
+      "desc": "Professional timeline, experience, and education."
+    }
+  ]
+}
