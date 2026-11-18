@@ -17,6 +17,7 @@ const site_url = new URL('/', 'https://losedavidpb.github.io');
 
 const languages = ['en', 'es'];
 const default_language = 'en';
+const language_locales = { en: 'en-US', es: 'es-ES' };
 
 // Canonical public pages grouped by the website that owns them
 const sitemap_sections = [
@@ -121,6 +122,28 @@ function set_attribute(tag, attribute, value) {
 }
 
 /**
+ * Resolve language-aware link templates in prerendered pages.
+ *
+ * @param {string} html
+ * @param {string} language
+ * @returns {string}
+ */
+function render_localized_links(html, language) {
+    return html.replace(
+        /<a\b([^>]*\sdata-localized-href="([^"]+)"[^>]*)>/gi,
+        (_, raw_attributes, href_template) => {
+            const href = href_template
+                .replace('{lang}', language)
+                .replace('{locale}', language_locales[language]);
+
+            const attributes = raw_attributes.replace(/\sdata-localized-href="[^"]+"/i, '');
+
+            return set_attribute(`<a${attributes}>`, 'href', href);
+        }
+    );
+}
+
+/**
  * Render one localized production page
  *
  * @param {string} template
@@ -139,6 +162,7 @@ function render_page(template, language, locale) {
     // Replace every localization marker with content from the selected locale
     html = render_text_markers(html, locale);
     html = render_attribute_markers(html, locale);
+    html = render_localized_links(html, language);
 
     // Localized pages are one directory below the shared assets and favicon
     html = html.replaceAll('./assets/', '../assets/');
@@ -439,6 +463,17 @@ async function validate_build(locales) {
         // Every localized page must include its absolute canonical URL
         if (!html.includes(new URL(`${language}/`, site_url).toString())) {
             throw new Error(`Missing canonical URL for ${language}`);
+        }
+
+        // Language-aware destinations must match the language of the generated page
+        if (!html.includes(`href="/portfolio/${language}/"`)) {
+            throw new Error(`Invalid portfolio URL for ${language}`);
+        }
+
+        const linked_in_url = `https://www.linkedin.com/in/losedavidpb/?locale=${language_locales[language]}`;
+
+        if ((html.match(new RegExp(linked_in_url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) ?? []).length !== 2) {
+            throw new Error(`Invalid LinkedIn URLs for ${language}`);
         }
     }
 }

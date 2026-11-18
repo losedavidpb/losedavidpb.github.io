@@ -48,6 +48,19 @@ function set_page_urls() {
 }
 
 /**
+ * Point language-aware links at content matching the current page language.
+ */
+function set_localized_links() {
+    const locale = { en: 'en-US', es: 'es-ES' }[lang];
+
+    document.querySelectorAll('[data-localized-href]').forEach(link => {
+        link.href = link.dataset.localizedHref
+            .replace('{lang}', lang)
+            .replace('{locale}', locale);
+    });
+}
+
+/**
  * Set language selector destinations and active state.
  */
 function set_lang_selector() {
@@ -74,5 +87,6 @@ function set_lang_selector() {
 export function init_page(locale) {
     set_localized_content(locale);
     set_page_urls();
+    set_localized_links();
     set_lang_selector();
 }
