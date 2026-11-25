@@ -339,6 +339,25 @@ async function optimize_static_assets() {
 }
 
 /**
+ * Minify JSON-LD script contents as JSON rather than JavaScript
+ *
+ * @param {string} html
+ * @returns {string}
+ */
+function minify_json_ld(html) {
+    return html.replace(
+        /(<script\b[^>]*\btype\s*=\s*(["'])application\/ld\+json\2[^>]*>)([\s\S]*?)(<\/script\s*>)/gi,
+        (_, opening_tag, _quote, json, closing_tag) => {
+            try {
+                return `${opening_tag}${JSON.stringify(JSON.parse(json))}${closing_tag}`;
+            } catch (error) {
+                throw new Error(`Invalid JSON-LD: ${error.message}`, { cause: error });
+            }
+        }
+    );
+}
+
+/**
  * Minify generated HTML pages without changing the readable template
  *
  * @returns {Promise<void>}
@@ -346,7 +365,8 @@ async function optimize_static_assets() {
 async function optimize_html_files() {
     // Include the root redirect and every localized page generated inside dist
     for (const file of await find_files(dist_dir, '.html')) {
-        const result = await minify_html(await readFile(file, 'utf8'), {
+        const html = minify_json_ld(await readFile(file, 'utf8'));
+        const result = await minify_html(html, {
             collapseWhitespace: true,
             removeComments: true,
             removeRedundantAttributes: true,
@@ -444,6 +464,23 @@ async function validate_build(locales) {
 
         // Confirm that the exported locale file contains valid JSON
         JSON.parse(json);
+
+        // JSON-LD must remain valid and compact after HTML optimization
+        const json_ld_scripts = [...html.matchAll(
+            /<script\b[^>]*\btype\s*=\s*(["'])application\/ld\+json\1[^>]*>([\s\S]*?)<\/script\s*>/gi
+        )];
+
+        if (json_ld_scripts.length === 0) {
+            throw new Error(`Missing JSON-LD in ${language}/index.html`);
+        }
+
+        for (const [, , json_ld] of json_ld_scripts) {
+            JSON.parse(json_ld);
+
+            if (/\r|\n/.test(json_ld)) {
+                throw new Error(`Unminified JSON-LD in ${language}/index.html`);
+            }
+        }
 
         // Check the language and environment metadata on the generated page
         if (!html.includes(`<html lang="${language}" data-environment="production">`)) {
