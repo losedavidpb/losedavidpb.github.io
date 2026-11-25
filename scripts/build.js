@@ -221,6 +221,15 @@ function render_root_page(locales) {
     <link rel="alternate" hreflang="en" href="${new URL('en/', site_url)}">
     <link rel="alternate" hreflang="es" href="${new URL('es/', site_url)}">
     <link rel="alternate" hreflang="x-default" href="${default_url}">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "David Parreño Barbuzano",
+        "alternateName": "David Parreño",
+        "url": "${site_url}"
+    }
+    </script>
     <script>window.location.replace('./${default_language}/');</script>
 </head>
 <body>
@@ -440,6 +449,31 @@ async function write_root_files(locales) {
 }
 
 /**
+ * Validate and parse every JSON-LD block in a generated page
+ *
+ * @param {string} html
+ * @param {string} output_file
+ * @returns {object[]}
+ */
+function validate_json_ld(html, output_file) {
+    const scripts = [...html.matchAll(
+        /<script\b[^>]*\btype\s*=\s*(["'])application\/ld\+json\1[^>]*>([\s\S]*?)<\/script\s*>/gi
+    )];
+
+    if (scripts.length === 0) {
+        throw new Error(`Missing JSON-LD in ${output_file}`);
+    }
+
+    return scripts.map(([, , json_ld]) => {
+        if (/\r|\n/.test(json_ld)) {
+            throw new Error(`Unminified JSON-LD in ${output_file}`);
+        }
+
+        return JSON.parse(json_ld);
+    });
+}
+
+/**
  * Validate generated production files
  *
  * @param {Map<string, object>} locales
@@ -447,6 +481,8 @@ async function write_root_files(locales) {
  */
 async function validate_build(locales) {
     const sitemap = await readFile(path.join(dist_dir, 'sitemap.xml'), 'utf8');
+    const root_html = await readFile(path.join(dist_dir, 'index.html'), 'utf8');
+    const [root_json_ld] = validate_json_ld(root_html, 'index.html');
 
     // Confirm that every configured public page is present in the consolidated sitemap
     for (const section of sitemap_sections) {
@@ -465,21 +501,11 @@ async function validate_build(locales) {
         // Confirm that the exported locale file contains valid JSON
         JSON.parse(json);
 
-        // JSON-LD must remain valid and compact after HTML optimization
-        const json_ld_scripts = [...html.matchAll(
-            /<script\b[^>]*\btype\s*=\s*(["'])application\/ld\+json\1[^>]*>([\s\S]*?)<\/script\s*>/gi
-        )];
+        // Every home-page variant must use the same valid, compact site identity
+        const [localized_json_ld] = validate_json_ld(html, `${language}/index.html`);
 
-        if (json_ld_scripts.length === 0) {
-            throw new Error(`Missing JSON-LD in ${language}/index.html`);
-        }
-
-        for (const [, , json_ld] of json_ld_scripts) {
-            JSON.parse(json_ld);
-
-            if (/\r|\n/.test(json_ld)) {
-                throw new Error(`Unminified JSON-LD in ${language}/index.html`);
-            }
+        if (JSON.stringify(localized_json_ld) !== JSON.stringify(root_json_ld)) {
+            throw new Error(`Inconsistent JSON-LD in ${language}/index.html`);
         }
 
         // Check the language and environment metadata on the generated page
